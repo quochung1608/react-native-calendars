@@ -71,6 +71,22 @@ describe('dateutils', function () {
   });
 
   describe('isLTE()', function () {
+    it('a is undefined', function () {
+      const a = undefined;
+      const b = XDate(2014, 1, 20);
+      expect(isLTE(b, a)).toBe(undefined);
+    });
+
+    it('b is undefined', function () {
+      const a = XDate(2013, 12, 31);
+      const b = undefined;
+      expect(isLTE(b, a)).toBe(undefined);
+    });
+
+    it('both are undefined', function () {
+      expect(isLTE(undefined, undefined)).toBe(undefined);
+    });
+
     it('2014-01-20 >= 2013-12-31', function () {
       const a = XDate(2013, 12, 31);
       const b = XDate(2014, 1, 20);
@@ -98,6 +114,22 @@ describe('dateutils', function () {
   });
 
   describe('isGTE()', function () {
+    it('a is undefined', function () {
+      const a = undefined;
+      const b = XDate(2014, 1, 20);
+      expect(isGTE(b, a)).toBe(undefined);
+    });
+
+    it('b is undefined', function () {
+      const a = XDate(2013, 12, 31);
+      const b = undefined;
+      expect(isGTE(b, a)).toBe(undefined);
+    });
+
+    it('both are undefined', function () {
+      expect(isGTE(undefined, undefined)).toBe(undefined);
+    });
+
     it('2014-01-20 >= 2013-12-31', function () {
       const a = XDate(2013, 12, 31);
       const b = XDate(2014, 1, 20);
@@ -128,6 +160,11 @@ describe('dateutils', function () {
     it('2014 May', function () {
       const days = month(XDate(2014, 4, 1));
       expect(days.length).toBe(31);
+    });
+
+    it('2014 June', function () {
+      const days = month(XDate(2014, 5, 1));
+      expect(days.length).toBe(30);
     });
 
     it('2014 August', function () {

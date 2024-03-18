@@ -8,56 +8,32 @@ import debounce from 'lodash/debounce';
 
 import XDate from 'xdate';
 
-import React, {useCallback, useContext, useEffect, useRef} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useRef} from 'react';
 import {
-  Text,
   SectionList,
-  SectionListProps,
   DefaultSectionT,
   SectionListData,
-  ViewStyle,
   NativeSyntheticEvent,
   NativeScrollEvent,
   LayoutChangeEvent,
-  ViewToken
+  ViewToken,
 } from 'react-native';
 
-import {isToday, isGTE, sameDate} from '../dateutils';
+import {useDidUpdate} from '../hooks';
 import {getMoment} from '../momentResolver';
+import {isToday, isGTE, sameDate} from '../dateutils';
 import {parseDate} from '../interface';
 import {getDefaultLocale} from '../services';
 import {UpdateSources, todayString} from './commons';
-import {Theme} from '../types';
-import styleConstructor from './style';
 import constants from '../commons/constants';
+import styleConstructor from './style';
 import Context from './Context';
-
+import InfiniteAgendaList from './infiniteAgendaList';
+import {AgendaListProps, AgendaSectionHeader} from './AgendaListsCommon';
 
 const viewabilityConfig = {
   itemVisiblePercentThreshold: 20 // 50 means if 50% of the item is visible
 };
-
-export interface AgendaListProps extends SectionListProps<any, DefaultSectionT> {
-  /** Specify theme properties to override specific styles for calendar parts */
-  theme?: Theme;
-  /** day format in section title. Formatting values: http://arshaw.com/xdate/#Formatting */
-  dayFormat?: string;
-  /** a function to custom format the section header's title */
-  dayFormatter?: (arg0: string) => string;
-  /** whether to use moment.js for date string formatting
-   * (remember to pass 'dayFormat' with appropriate format, like 'dddd, MMM D') */
-  useMoment?: boolean;
-  /** whether to mark today's title with the "Today, ..." string. Default = true */
-  markToday?: boolean;
-  /** style passed to the section view */
-  sectionStyle?: ViewStyle;
-  /** whether to block the date change in calendar (and calendar context provider) when agenda scrolls */
-  avoidDateUpdates?: boolean;
-  /** offset scroll to section */
-  viewOffset?: number;
-  /** enable scrolling the agenda list to the next date with content when pressing a day without content */
-  scrollToNextEvent?: boolean;
-}
 
 /**
  * @description: AgendaList component
@@ -66,26 +42,32 @@ export interface AgendaListProps extends SectionListProps<any, DefaultSectionT> 
  * @example: https://github.com/wix/react-native-calendars/blob/master/example/src/screens/expandableCalendar.js
  */
 const AgendaList = (props: AgendaListProps) => {
+  if (props.infiniteListProps) {
+    return <InfiniteAgendaList {...props} />;
+  }
+
   const {
-    theme, 
-    sections, 
-    scrollToNextEvent, 
-    viewOffset = 0, 
-    avoidDateUpdates, 
-    onScroll, 
-    onMomentumScrollBegin, 
+    theme,
+    sections,
+    scrollToNextEvent,
+    viewOffset = 0,
+    avoidDateUpdates,
+    onScroll,
+    onMomentumScrollBegin,
     onMomentumScrollEnd,
     onScrollToIndexFailed,
     renderSectionHeader,
     sectionStyle,
     keyExtractor,
-    dayFormatter, 
-    dayFormat = 'dddd, MMM d', 
-    useMoment, 
+    dayFormatter,
+    dayFormat = 'dddd, MMM d',
+    useMoment,
     markToday = true,
-    onViewableItemsChanged
+    onViewableItemsChanged,
   } = props;
+
   const {date, updateSource, setDate, setDisabled} = useContext(Context);
+
   const style = useRef(styleConstructor(theme));
   const list = useRef<any>();
   const _topSection = useRef(sections[0]?.title);
@@ -101,7 +83,7 @@ const AgendaList = (props: AgendaListProps) => {
     }
   }, []);
 
-  useEffect(() => {
+  useDidUpdate(() => {
     // NOTE: on first init data should set first section to the current date!!!
     if (updateSource !== UpdateSources.LIST_DRAG && updateSource !== UpdateSources.CALENDAR_INIT) {
       scrollToSection(date);
@@ -124,7 +106,7 @@ const AgendaList = (props: AgendaListProps) => {
     for (let j = 1; j < sections.length; j++) {
       const prev = parseDate(sections[j - 1]?.title);
       const next = parseDate(sections[j]?.title);
-      const cur = parseDate(date);
+      const cur = new XDate(date);
       if (isGTE(cur, prev) && isGTE(next, cur)) {
         i = sameDate(prev, cur) ? j - 1 : j;
         break;
@@ -135,7 +117,7 @@ const AgendaList = (props: AgendaListProps) => {
     return i;
   };
 
-  const getSectionTitle = (title: string) => {
+  const getSectionTitle = useCallback((title: string) => {
     if (!title) return;
 
     let sectionTitle = title;
@@ -153,12 +135,12 @@ const AgendaList = (props: AgendaListProps) => {
 
     if (markToday) {
       const string = getDefaultLocale().today || todayString;
-      const today = isToday(new XDate(title));
+      const today = isToday(title);
       sectionTitle = today ? `${string}, ${sectionTitle}` : sectionTitle;
     }
 
     return sectionTitle;
-  };
+  }, []);
 
   const scrollToSection = useCallback(debounce((d) => {
     const sectionIndex = scrollToNextEvent ? getNextSectionIndex(d) : getSectionIndex(d);
@@ -172,12 +154,12 @@ const AgendaList = (props: AgendaListProps) => {
       list?.current.scrollToLocation({
         animated: true,
         sectionIndex: sectionIndex,
-        itemIndex: 0,
+        itemIndex: 1,
         viewPosition: 0, // position at the top
         viewOffset: (constants.isAndroid ? sectionHeight.current : 0) + viewOffset
       });
     }
-  }, 1000, {leading: false, trailing: true}), []);
+  }, 1000, {leading: false, trailing: true}), [viewOffset, sections]);
 
   const _onViewableItemsChanged = useCallback((info: {viewableItems: Array<ViewToken>; changed: Array<ViewToken>}) => {
     if (info?.viewableItems && !sectionScroll.current) {
@@ -191,14 +173,15 @@ const AgendaList = (props: AgendaListProps) => {
       }
     }
     onViewableItemsChanged?.(info);
-  }, [_topSection.current, didScroll.current, avoidDateUpdates, setDate, onViewableItemsChanged]);
+  }, [avoidDateUpdates, setDate, onViewableItemsChanged]);
 
   const _onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!didScroll.current) {
       didScroll.current = true;
+      scrollToSection.cancel();
     }
     onScroll?.(event);
-  }, [didScroll.current, onScroll]);
+  }, [onScroll]);
 
   const _onMomentumScrollBegin = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     setDisabled?.(true);
@@ -211,6 +194,8 @@ const AgendaList = (props: AgendaListProps) => {
     setDisabled?.(false);
     onMomentumScrollEnd?.(event);
   }, [onMomentumScrollEnd, setDisabled]);
+
+  const headerTextStyle = useMemo(() => [style.current.sectionText, sectionStyle], [sectionStyle]);
 
   const _onScrollToIndexFailed = useCallback((info: {index: number; highestMeasuredFrameIndex: number; averageItemLength: number}) => {
     if (onScrollToIndexFailed) {
@@ -231,12 +216,9 @@ const AgendaList = (props: AgendaListProps) => {
       return renderSectionHeader(title);
     }
 
-    return (
-      <Text allowFontScaling={false} style={[style.current.sectionText, sectionStyle]} onLayout={onHeaderLayout}>
-        {getSectionTitle(title)}
-      </Text>
-    );
-  }, []);
+    const headerTitle = getSectionTitle(title);
+    return <AgendaSectionHeader title={headerTitle} style={headerTextStyle} onLayout={onHeaderLayout}/>;
+  }, [headerTextStyle]);
 
   const _keyExtractor = useCallback((item: any, index: number) => {
     return isFunction(keyExtractor) ? keyExtractor(item, index) : String(index);
@@ -244,6 +226,7 @@ const AgendaList = (props: AgendaListProps) => {
 
   return (
     <SectionList
+      stickySectionHeadersEnabled
       {...props}
       ref={list}
       keyExtractor={_keyExtractor}
@@ -274,9 +257,4 @@ AgendaList.propTypes = {
   markToday: PropTypes.bool,
   sectionStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array]),
   avoidDateUpdates: PropTypes.bool
-};
-AgendaList.defaultProps = {
-  dayFormat: 'dddd, MMM d',
-  stickySectionHeadersEnabled: true,
-  markToday: true
 };

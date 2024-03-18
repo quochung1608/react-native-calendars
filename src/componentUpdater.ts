@@ -1,5 +1,8 @@
-import {CalendarListProps} from './calendar-list';
 import {CalendarProps} from './calendar';
+import {CalendarListProps} from './calendar-list';
+import {AgendaProps} from './agenda';
+import {ReservationListProps} from './agenda/reservation-list';
+
 import {MarkingProps} from './calendar/day/marking';
 
 const get = require('lodash/get');
@@ -18,6 +21,7 @@ export function shouldUpdate(props: any, newProps: any, paths: string[]) {
   return false;
 }
 
+// TODO: remove
 export function extractComponentProps(component: any, props: any, ignoreProps?: string[]) {
   const componentPropTypes = component.propTypes;
   if (componentPropTypes) {
@@ -66,7 +70,8 @@ export function extractDayProps(props: CalendarProps) {
     date,
     disableAllTouchEventsForDisabledDays,
     disableAllTouchEventsForInactiveDays,
-    dayComponent
+    dayComponent,
+    testID
   } = props;
 
   const dayProps = {
@@ -79,7 +84,8 @@ export function extractDayProps(props: CalendarProps) {
     date,
     disableAllTouchEventsForDisabledDays,
     disableAllTouchEventsForInactiveDays,
-    dayComponent
+    dayComponent,
+    testID
   };
 
   return dayProps;
@@ -107,7 +113,8 @@ export function extractHeaderProps(props: CalendarProps) {
     webAriaLevel,
     numberOfDays,
     current,
-    timelineLeftInset
+    timelineLeftInset,
+    testID
   } = props;
 
   const headerProps = {
@@ -131,7 +138,8 @@ export function extractHeaderProps(props: CalendarProps) {
     webAriaLevel,
     numberOfDays,
     current,
-    timelineLeftInset
+    timelineLeftInset,
+    testID
   };
 
   return headerProps;
@@ -160,4 +168,125 @@ export function extractCalendarProps(props: CalendarListProps) {
   } = props;
 
   return others;
+}
+
+export function extractCalendarListProps(props: AgendaProps) {
+
+  const {
+    // Agenda props
+    loadItemsForMonth,
+    onCalendarToggled,
+    renderKnob,
+    selected,
+    hideKnob,
+    showClosingKnob,
+    // ReservationList props
+    items,
+    selectedDay,
+    topDay,
+    onDayChange,
+    showOnlySelectedDayItems,
+    renderEmptyData,
+    // onScroll,
+    // onScrollBeginDrag,
+    // onScrollEndDrag,
+    // onMomentumScrollBegin,
+    // onMomentumScrollEnd,
+    // refreshControl,
+    // refreshing,
+    // onRefresh,
+    reservationsKeyExtractor,
+    // Reservation props
+    date,
+    item,
+    rowHasChanged,
+    // renderDay,
+    renderItem,
+    renderEmptyDate,
+    ...others
+  } = props;
+
+  return others;
+}
+
+export function extractReservationListProps(props: AgendaProps) {
+  const {
+    // ReservationList props
+    items,
+    selectedDay,
+    topDay,
+    onDayChange,
+    showOnlySelectedDayItems,
+    renderEmptyData,
+    onScroll,
+    onScrollBeginDrag,
+    onScrollEndDrag,
+    onMomentumScrollBegin,
+    onMomentumScrollEnd,
+    refreshControl,
+    refreshing,
+    onRefresh,
+    reservationsKeyExtractor,
+    // Reservation props
+    date,
+    item,
+    theme,
+    rowHasChanged,
+    renderDay,
+    renderItem,
+    renderEmptyDate,
+  } = props;
+
+  const ReservationListProps = {
+    // ReservationList props
+    items,
+    selectedDay,
+    topDay,
+    onDayChange,
+    showOnlySelectedDayItems,
+    renderEmptyData,
+    onScroll,
+    onScrollBeginDrag,
+    onScrollEndDrag,
+    onMomentumScrollBegin,
+    onMomentumScrollEnd,
+    refreshControl,
+    refreshing,
+    onRefresh,
+    reservationsKeyExtractor,
+    // Reservation props
+    date,
+    item,
+    theme,
+    rowHasChanged,
+    renderDay,
+    renderItem,
+    renderEmptyDate,
+  };
+
+  return ReservationListProps;
+}
+
+export function extractReservationProps(props: ReservationListProps) {
+  const {
+    date,
+    item,
+    theme,
+    rowHasChanged,
+    renderDay,
+    renderItem,
+    renderEmptyDate
+  } = props;
+
+  const reservationProps = {
+    date,
+    item,
+    theme,
+    rowHasChanged,
+    renderDay,
+    renderItem,
+    renderEmptyDate
+  };
+
+  return reservationProps;
 }

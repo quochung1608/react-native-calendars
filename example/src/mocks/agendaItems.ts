@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import {MarkedDates} from '../../../src/types';
 
 const today = new Date().toISOString().split('T')[0];
 const fastDate = getPastDate(3);
@@ -6,7 +7,7 @@ const futureDates = getFutureDates(12);
 const dates = [fastDate, today].concat(futureDates);
 
 function getFutureDates(numberOfDays: number) {
-  const array = [];
+  const array: string[] = [];
   for (let index = 1; index <= numberOfDays; index++) {
     let d = Date.now();
     if (index > 8) {
@@ -116,12 +117,8 @@ export const agendaItems = [
   }
 ];
 
-type MarkedDate = {
-  [key: string]: object;
-}
-
 export function getMarkedDates() {
-  const marked: MarkedDate = {};
+  const marked: MarkedDates = {};
 
   agendaItems.forEach(item => {
     // NOTE: only mark dates with data

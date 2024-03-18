@@ -1,6 +1,14 @@
 import {ViewStyle, TextStyle} from 'react-native';
+import {MarkingProps} from './calendar/day/marking';
+import {CalendarContextProps} from './expandableCalendar/Context';
 
+export type ContextProp = {
+  context?: CalendarContextProps;
+}
 export type MarkingTypes = 'dot' | 'multi-dot' | 'period' | 'multi-period' | 'custom';
+export type MarkedDates = {
+  [key: string]: MarkingProps;
+};
 export type DayState = 'selected' | 'disabled' | 'inactive' | 'today' | '';
 export type Direction = 'left' | 'right';
 export type DateData = {
@@ -98,4 +106,9 @@ export type AgendaEntry = {
 
 export type AgendaSchedule = {
   [date: string]: AgendaEntry[];
+}
+
+export interface DayAgenda {
+  reservation?: AgendaEntry;
+  date?: XDate;
 }

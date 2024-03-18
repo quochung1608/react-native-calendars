@@ -1,5 +1,4 @@
 import './wdyr'; // <--- must be first import
-
 import {Navigation} from 'react-native-navigation';
 // import {I18nManager} from 'react-native'; // <--- In order to test RTL
 //@ts-expect-error
@@ -11,12 +10,11 @@ registerScreens();
 // eslint-disable-next-line no-console
 console.ignoredYellowBox = ['Remote debugger'];
 
-LocaleConfig.locales['en'] = {
-  formatAccessibilityLabel: "dddd d 'of' MMMM 'of' yyyy",
+LocaleConfig.locales['vi'] = {
   monthNames: [
-    'January',
+    '12321312321',
     'February',
-    'March',
+    'abc',
     'April',
     'May',
     'June',
@@ -28,11 +26,11 @@ LocaleConfig.locales['en'] = {
     'December'
   ],
   monthNamesShort: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
-  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-  dayNamesShort: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+  dayNames: ['Chu Nhat', 'Hai', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  dayNamesShort: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
   // numbers: ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'] // number localization example
 };
-LocaleConfig.defaultLocale = 'en';
+LocaleConfig.defaultLocale = 'vi';
 
 /*
 LocaleConfig.locales['fr'] = {

@@ -27,6 +27,7 @@ export interface TimelineHoursProps {
   width: number;
   numberOfDays: number;
   timelineLeftInset?: number;
+  testID?: string;
 }
 
 const dimensionWidth = constants.screenWidth;
@@ -45,7 +46,8 @@ const TimelineHours = (props: TimelineHoursProps) => {
     onBackgroundLongPressOut,
     width,
     numberOfDays = 1,
-    timelineLeftInset = 0
+    timelineLeftInset = 0,
+    testID,
   } = props;
 
   const lastLongPressEventTime = useRef<NewEventTime>();
@@ -100,8 +102,9 @@ const TimelineHours = (props: TimelineHoursProps) => {
       <TouchableWithoutFeedback onLongPress={handleBackgroundPress} onPressOut={handlePressOut}>
         <View style={StyleSheet.absoluteFillObject} />
       </TouchableWithoutFeedback>
-      {unavailableHoursBlocks.map(block => (
+      {unavailableHoursBlocks.map((block, index) => (
         <View
+          key={index}
           style={[
             styles.unavailableHoursBlock,
             block,
@@ -120,19 +123,21 @@ const TimelineHours = (props: TimelineHoursProps) => {
             {time === start ? null : (
               <View
                 key={`line${time}`}
+                testID={`${testID}.${time}.line`}
                 style={[styles.line, {top: offset * index, width: dimensionWidth - EVENT_DIFF, left: timelineLeftInset - 16}]}
               />
             )}
             {
               <View
                 key={`lineHalf${time}`}
+                testID={`${testID}.${time}.lineHalf`}
                 style={[styles.line, {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF, left: timelineLeftInset - 16}]}
               />
             }
           </React.Fragment>
         );
       })}
-      {times(numberOfDays, (index) => <View style={[styles.verticalLine, {right: (index + 1) * width / numberOfDays}]} />)}
+      {times(numberOfDays, (index) => <View key={index} style={[styles.verticalLine, {right: (index + 1) * width / numberOfDays}]} />)}
     </>
   );
 };
